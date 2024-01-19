@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:chat_app/widgets/user_image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 //firebase object for all auth methods
 final _firebase = FirebaseAuth.instance;
@@ -25,6 +27,21 @@ class _AuthScreenState extends State<AuthScreen> {
   File? _selectedImage;
   var _isAuthenticating = false;
   var _enteredUsername = '';
+
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+//apple auth
+  Future<void> signInWithApple() async {
+    try {
+      final OAuthProvider oAuthProvider = OAuthProvider("apple.com");
+      final UserCredential userCredential =
+          await _auth.signInWithPopup(oAuthProvider);
+
+      print(userCredential.user); // logged-in Apple user
+    } catch (e) {
+      print("Error signing in with Apple: $e");
+    }
+  }
 
   void _submit() async {
     final isValid = _formKey.currentState!.validate();
@@ -189,6 +206,13 @@ class _AuthScreenState extends State<AuthScreen> {
                                 ? 'Create an account'
                                 : 'I already have an account'),
                           ),
+                        SignInWithAppleButton(
+                          onPressed: () async {
+                            if (kIsWeb) {
+                              await signInWithApple();
+                            }
+                          },
+                        ),
                       ],
                     ),
                   ),
